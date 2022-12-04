@@ -5,26 +5,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.lang.Integer;
 import java.lang.Character;
+import java.util.Objects;
+
 class Play {
-    private final Map<Character, Integer> score = new HashMap<Character, Integer>();
+    private final Map<Character, Integer> score = new HashMap<>();
     private Character theirs;
     private Character mine;
     public Play() {
-        score.put(Character.valueOf('A'), 1);
-        score.put(Character.valueOf('B'), 2);
-        score.put(Character.valueOf('C'), 3);
-        score.put(Character.valueOf('X'), 1);
-        score.put(Character.valueOf('Y'), 2);
-        score.put(Character.valueOf('Z'), 3);
-    }
-    public Play(char theirs, char mine) {
-        this();
-        this.theirs = Character.valueOf(theirs);
-        this.mine = Character.valueOf(mine);
+        score.put('A', 1);
+        score.put('B', 2);
+        score.put('C', 3);
+        score.put('X', 1);
+        score.put('Y', 2);
+        score.put('Z', 3);
     }
 
     public boolean tie ()  {
-        return score.get(this.theirs) == score.get(this.mine);
+        return Objects.equals(score.get(this.theirs), score.get(this.mine));
     }
 
     public boolean win () {
@@ -39,9 +36,9 @@ class Play {
 
     public Integer getScore () {
         if(this.tie()) {
-            return  Integer.valueOf(3 + score.get(this.mine));
+            return 3 + score.get(this.mine);
         } else if (this.win()) {
-            return Integer.valueOf(6 + score.get(this.mine));
+            return 6 + score.get(this.mine);
         } else {
             return score.get(this.mine);
         }
@@ -52,22 +49,22 @@ class Play {
     }
 
     public void mustWin() {
-        if(score.get(this.theirs).equals(Integer.valueOf(3))) {
-            this.mine = Character.valueOf('A');
-        } else if (score.get(this.theirs).equals(Integer.valueOf(1))) {
-            this.mine = Character.valueOf('B');
+        if(score.get(this.theirs).equals(3)) {
+            this.mine = 'A';
+        } else if (score.get(this.theirs).equals(1)) {
+            this.mine = 'B';
         } else  {
-            this.mine = Character.valueOf('C');
+            this.mine = 'C';
         }
     }
 
     public void mustLose() {
-        if(score.get(this.theirs).equals(Integer.valueOf(3))) {
-            this.mine = Character.valueOf('B');
-        } else if (score.get(this.theirs).equals(Integer.valueOf(1))) {
-            this.mine = Character.valueOf('C');
+        if(score.get(this.theirs).equals(3)) {
+            this.mine = 'B';
+        } else if (score.get(this.theirs).equals(1)) {
+            this.mine = 'C';
         } else  {
-            this.mine = Character.valueOf('A');
+            this.mine = 'A';
         }
     }
 
@@ -79,26 +76,22 @@ class Play {
         return this.mine;
     }
 
-    public void setMine(Character mine) {
-        this.mine = mine;
-    }
-
     public void setTheirs(Character theirs) {
         this.theirs = theirs;
     }
 }
 
 
-public class Main {
+public class Advent02 {
     public static void main(String[] args) {
-        String fileName = "/home/mark/src/adventcode/02/input.txt";
-        Map<Character, String> name = new HashMap<Character, String>();
-        name.put(Character.valueOf('A'), "rock");
-        name.put(Character.valueOf('X'), "lose");
-        name.put(Character.valueOf('B'), "paper");
-        name.put(Character.valueOf('Y'), "tie");
-        name.put(Character.valueOf('C'), "scissors");
-        name.put(Character.valueOf('Z'), "win");
+        String fileName = "02/input.txt";
+        Map<Character, String> name = new HashMap<>();
+        name.put('A', "rock");
+        name.put('X', "lose");
+        name.put('B', "paper");
+        name.put('Y', "tie");
+        name.put('C', "scissors");
+        name.put('Z', "win");
 
         int score = 0;
         BufferedReader reader;
@@ -115,7 +108,7 @@ public class Main {
                 } else if (name.get(line.charAt(2)).equalsIgnoreCase("win")) {
                     play.mustWin();
                 }
-                score += play.getScore().intValue();
+                score += play.getScore();
                 if(play.tie()) {
                     System.out.println(line+": "+name.get(play.getMine()) + " ties with "+name.get(play.getTheirs())+ " score = "+play.getScore());
                 } else if (play.win()) {

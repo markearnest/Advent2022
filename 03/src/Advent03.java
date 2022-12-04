@@ -3,20 +3,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.lang.Integer;
-import java.lang.CharSequence;
 import java.lang.StringBuilder;
 import java.lang.Character;
 
 class RuckSack {
-    private String compartment1;
-    private String compartment2;
+    private final String compartment1;
+    private final String compartment2;
 
-    public RuckSack() {
-
-    }
     public RuckSack(String contents) {
         final int mid = contents.length() / 2;
         String[] parts = {contents.substring(0, mid),contents.substring(mid)};
@@ -43,24 +36,16 @@ class RuckSack {
         return sb.toString();
     }
 
-    public String getCompartment1() {
-        return compartment1;
-    }
-
-    public String getCompartment2() {
-        return compartment2;
-    }
-
     public String getContents() {
         return compartment1.concat(compartment2);
     }
 }
 
-public class Main {
+public class Advent03 {
 
     public static void main(String[] args) {
-        List<RuckSack> rsList = new ArrayList<RuckSack>();
-        String fileName = "/home/mark/src/adventcode/03/input.txt";
+        List<RuckSack> rsList = new ArrayList<>();
+        String fileName = "03/input.txt";
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(fileName));
@@ -79,7 +64,7 @@ public class Main {
             for(int x = 0; x < rsList.size(); x += 3) {
                 String common = rsList.get(x).getDupe(rsList.get(x+1).getContents());
                 common = rsList.get(x+2).getDupe(common);
-                total2 += getPriority(Character.valueOf(common.charAt(0)));
+                total2 += getPriority(common.charAt(0));
             }
             System.out.println("total2 = " + total2);
         } catch (IOException e) {
@@ -88,7 +73,7 @@ public class Main {
     }
 
     private static int getPriority(char c) {
-        int retVal = 0;
+        int retVal;
         if(Character.isUpperCase(c)) {
             retVal = ((int)c)-64+26;
         } else {

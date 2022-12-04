@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.lang.Integer;
 
-public class Main {
+public class Advent01 {
     public static void main(String[] args) {
-         String fileName = "/home/mark/src/adventcode/01/input.txt";
-        List<Integer> calorieList = new ArrayList<Integer>();
+         String fileName = "01/input.txt";
+        List<Integer> calorieList = new ArrayList<>();
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(fileName));
@@ -25,11 +25,11 @@ public class Main {
                 line = reader.readLine();
             }
             reader.close();
-            Collections.sort(calorieList, Collections.reverseOrder());
+            calorieList.sort(Collections.reverseOrder());
             int topNum = 3;
             int topVal = 0;
             for (int i = 0; i < topNum; i++) {
-                topVal += calorieList.get(i).intValue();
+                topVal += calorieList.get(i);
             }
             System.out.println(topVal);
         } catch (IOException e) {
