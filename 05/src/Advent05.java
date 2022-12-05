@@ -105,7 +105,7 @@ public class Advent05 {
             for(int x = 1; x<=numberOfStacks; x++) {
                 sb.append(stacks.get(x).peek());
             }
-            System.out.println("Top rows: " + sb);
+            System.out.println("Top row: " + sb);
 
         } catch (IOException e) {
             e.printStackTrace();
