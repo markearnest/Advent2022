@@ -8,7 +8,7 @@ import java.lang.Integer;
 
 public class Advent01 {
     public static void main(String[] args) {
-         String fileName = "01/input.txt";
+        String fileName = "01/input.txt";
         List<Integer> calorieList = new ArrayList<>();
         BufferedReader reader;
         try {
