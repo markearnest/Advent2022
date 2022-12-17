@@ -35,9 +35,9 @@ public class Advent16 {
         HashMap<String, Valve> valves = new HashMap<>();
         String fileName = "16/input.txt";
         BufferedReader reader;
-        boolean phase2 = false; // set to true for phase 2
         Set<String> valvesToOpen = new HashSet<>();
-        int minutes = phase2 ? 26 : 30;
+        int phase1Minutes = 30;
+        int phase2Minutes = 26;
         ProgressBarBuilder pbb = new ProgressBarBuilder()
                 .setTaskName("Pathfinding")
                 .setUnit(" Paths", 1)
@@ -59,9 +59,10 @@ public class Advent16 {
             e.printStackTrace();
         }
         Set<ValvePath> statesToCheck = new HashSet<>();
+        Set<ValvePath> statesToCheckPhase2 = new HashSet<>();
         ValvePath initialValvePath = new ValvePath(new HashMap<>(), valves.get("AA"), 0);
         statesToCheck.add(initialValvePath);
-        for(int i = 0; i < minutes; i++) {
+        for(int i = 0; i < phase1Minutes; i++) {
             System.out.println("Minute: " + (i+1) + " - "+ statesToCheck.size() + " calculations required");
             Set<ValvePath> newStatesToCheck = new HashSet<>();
             for(ValvePath valvePath : ProgressBar.wrap(statesToCheck, pbb)) {
@@ -77,56 +78,65 @@ public class Advent16 {
             }
             System.out.println();
             statesToCheck = newStatesToCheck;
+            if(i==phase2Minutes-1) {
+                statesToCheckPhase2 = newStatesToCheck;
+            }
         }
-        long maxFlow = 0;
+        long maxFlowPhase1 = 0;
+        long maxFlowPhase2Round1 = 0;
+        long maxFlowPhase2Round2 = 0;
         for(ValvePath valvePath : statesToCheck) {
-            if(valvePath.totalFlow() > maxFlow) {
-                maxFlow = valvePath.totalFlow();
+            if(valvePath.totalFlow() > maxFlowPhase1) {
+                maxFlowPhase1 = valvePath.totalFlow();
+            }
+        }
+        for(ValvePath valvePath : statesToCheckPhase2) {
+            if(valvePath.totalFlow() > maxFlowPhase2Round1) {
+                maxFlowPhase2Round1 = valvePath.totalFlow();
             }
         }
         ValvePath valvePathToFilter = null;
-        for(ValvePath valvePath : statesToCheck) {
-            if(valvePath.totalFlow() == maxFlow) {
+        for(ValvePath valvePath : statesToCheckPhase2) {
+            if(valvePath.totalFlow() == maxFlowPhase2Round1) {
                 valvePathToFilter = valvePath;
             }
         }
-        if (phase2) { // I'm just running the logic above again as the elephant now
-            Object[] toClear = valvePathToFilter.openValves().keySet().toArray();
-            for (Object valve : toClear) { // clear out already open valves
-                System.out.println("Clearing " + ((Valve) valve).valveName());
-                valves.get(((Valve) valve).valveName()).clearFlowRate();
-            }
-            initialValvePath = new ValvePath(new HashMap<>(), valves.get("AA"), 0);
-            statesToCheck = new HashSet<>();
-            statesToCheck.add(initialValvePath);
-            for(int i = 0; i < minutes; i++) {
-                System.out.println("Minute: " + (i+1) + " - "+ statesToCheck.size() + " calculations required");
-                Set<ValvePath> newStatesToCheck = new HashSet<>();
-                for(ValvePath valvePath : ProgressBar.wrap(statesToCheck, pbb)) {
-                    long totalFlow = valvePath.openValves().values().stream().mapToLong(e -> e).sum() + valvePath.totalFlow();
-                    if(valvePath.openValves().size() == valvesToOpen.size()) { // If all valves are open
-                        newStatesToCheck.add(new ValvePath(valvePath.openValves(), valves.get("AA"), totalFlow));
-                    }
-                    if (valvePath.currentValve().flowRate() > 0 && !valvePath.openValves().containsKey(valvePath.currentValve())) {
-                        HashMap newOpenValves = new HashMap(valvePath.openValves());
-                        newOpenValves.put(valvePath.currentValve(), valvePath.currentValve().flowRate());
-                        newStatesToCheck.add(new ValvePath(newOpenValves, valvePath.currentValve(), totalFlow));
-                    }
-                    Arrays.stream(valvePath.currentValve().adjacentValves()).forEach(name -> newStatesToCheck.add(new ValvePath(valvePath.openValves(), valves.get(name), totalFlow)));
-                }
-                System.out.println();
-                statesToCheck = newStatesToCheck;
-            }
-            long maxFlow2 = 0;
-            for(ValvePath valvePath : statesToCheck) {
-                if(valvePath.totalFlow() > maxFlow2) {
-                    maxFlow2 = valvePath.totalFlow();
-                }
-            }
-            maxFlow += maxFlow2;
+        Object[] toClear = new Object[0];
+        if (valvePathToFilter != null) {
+            toClear = valvePathToFilter.openValves().keySet().toArray();
         }
+        for (Object valve : toClear) { // clear out already open valves
+            System.out.println("Clearing " + ((Valve) valve).valveName());
+            valves.get(((Valve) valve).valveName()).clearFlowRate();
+        }
+        initialValvePath = new ValvePath(new HashMap<>(), valves.get("AA"), 0);
+        statesToCheck = new HashSet<>();
+        statesToCheck.add(initialValvePath);
+        for(int i = 0; i < phase2Minutes; i++) {
+            System.out.println("Minute: " + (i+1) + " - "+ statesToCheck.size() + " calculations required");
+            Set<ValvePath> newStatesToCheck = new HashSet<>();
+            for(ValvePath valvePath : ProgressBar.wrap(statesToCheck, pbb)) {
+                long totalFlow = valvePath.openValves().values().stream().mapToLong(e -> e).sum() + valvePath.totalFlow();
+                if (valvePath.currentValve().flowRate() > 0 && !valvePath.openValves().containsKey(valvePath.currentValve())) {
+                    HashMap newOpenValves = new HashMap(valvePath.openValves());
+                    newOpenValves.put(valvePath.currentValve(), valvePath.currentValve().flowRate());
+                    newStatesToCheck.add(new ValvePath(newOpenValves, valvePath.currentValve(), totalFlow));
+                }
+                Arrays.stream(valvePath.currentValve().adjacentValves()).forEach(name -> newStatesToCheck.add(new ValvePath(valvePath.openValves(), valves.get(name), totalFlow)));
+            }
+            System.out.println();
+            statesToCheck = newStatesToCheck;
+        }
+
+        for(ValvePath valvePath : statesToCheck) {
+            if(valvePath.totalFlow() > maxFlowPhase2Round2) {
+                maxFlowPhase2Round2 = valvePath.totalFlow();
+            }
+        }
+        maxFlowPhase2Round2 += maxFlowPhase2Round1;
         System.out.println();
-        System.out.println("Phase " + (phase2 ? "2 " : "1 ") + maxFlow);
+        System.out.println("Phase 1 " + maxFlowPhase1);
+        System.out.println("Phase 2 " + maxFlowPhase2Round2);
         long currentTime = System.currentTimeMillis();
         double elapsedTime = (currentTime - startTime) / 1000.0;
         System.out.println("Time in seconds : " + elapsedTime);
