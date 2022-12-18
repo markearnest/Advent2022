@@ -61,6 +61,7 @@ final class Point {
 
 public class Advent18 {
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
         String fileName = "input/input18.txt";
         ArrayList<Point> points = new ArrayList<>();
         BufferedReader reader;
@@ -96,6 +97,9 @@ public class Advent18 {
             exteriorSides += p.getSides();
         }
         System.out.println("Surface area: " + exteriorSides);
+        long currentTime = System.currentTimeMillis();
+        double elapsedTime = (currentTime - startTime) / 1000.0;
+        System.out.println("Time in seconds : " + elapsedTime);
     }
     public static int floodFillTest(ArrayList<Point> points, int startX, int startY, int startZ, int buffer) {
         int exteriorSides = 0;
