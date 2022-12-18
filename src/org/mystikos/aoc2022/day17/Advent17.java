@@ -6,6 +6,26 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+class TetrisColors {
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
+    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+    public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
+    public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
+    public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
+}
+
 class TetrisResults {
     private final long height;
     private final long pieces;
@@ -67,10 +87,21 @@ class Piece {
     public boolean isAtRest() {
         return atRest;
     }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String color;
     private boolean atRest;
-    public Piece(Point[] points) {
+    public Piece(Point[] points, String color) {
         this.points = points;
-        atRest = false;
+        this.atRest = false;
+        this.color = color;
     }
     public Piece(int topLine, int shape) {
         this(new Point(2, topLine + 4), shape);
@@ -84,6 +115,7 @@ class Piece {
                 points[1] = new Point(lowerLeft.getX() + 1, lowerLeft.getY());
                 points[2] = new Point(lowerLeft.getX() + 2, lowerLeft.getY());
                 points[3] = new Point(lowerLeft.getX() + 3, lowerLeft.getY());
+                color = TetrisColors.ANSI_CYAN;
             }
             case 1 -> { // plus
                 points[0] = new Point(lowerLeft.getX() + 1, lowerLeft.getY());
@@ -91,6 +123,7 @@ class Piece {
                 points[2] = new Point(lowerLeft.getX() + 1, lowerLeft.getY() + 1);
                 points[3] = new Point(lowerLeft.getX() + 2, lowerLeft.getY() + 1);
                 points[4] = new Point(lowerLeft.getX() + 1, lowerLeft.getY() + 2);
+                color = TetrisColors.ANSI_GREEN;
             }
             case 2 -> { // flipped L
                 points[0] = lowerLeft;
@@ -98,18 +131,21 @@ class Piece {
                 points[2] = new Point(lowerLeft.getX() + 2, lowerLeft.getY());
                 points[3] = new Point(lowerLeft.getX() + 2, lowerLeft.getY() + 1);
                 points[4] = new Point(lowerLeft.getX() + 2, lowerLeft.getY() + 2);
+                color = TetrisColors.ANSI_YELLOW;
             }
             case 3 -> { // |
                 points[0] = lowerLeft;
                 points[1] = new Point(lowerLeft.getX(), lowerLeft.getY() + 1);
                 points[2] = new Point(lowerLeft.getX(), lowerLeft.getY() + 2);
                 points[3] = new Point(lowerLeft.getX(), lowerLeft.getY() + 3);
+                color = TetrisColors.ANSI_RED;
             }
             case 4 -> { // square
                 points[0] = lowerLeft;
                 points[1] = new Point(lowerLeft.getX() + 1, lowerLeft.getY());
                 points[2] = new Point(lowerLeft.getX(), lowerLeft.getY() + 1);
                 points[3] = new Point(lowerLeft.getX() + 1, lowerLeft.getY() + 1);
+                color = TetrisColors.ANSI_PURPLE;
             }
         }
     }
@@ -178,7 +214,9 @@ class Piece {
     }
 }
 public class Advent17 {
-    public static void main(String[] args) {
+    static int maxHeightForDrawing = 0;
+
+    public static void main(String[] args) throws InterruptedException {
         long startTime = System.currentTimeMillis();
         String fileName = "input/input17.txt";
         long phase1Pieces = 2022L;
@@ -209,7 +247,7 @@ public class Advent17 {
         System.out.println("Time in seconds : " + elapsedTime);
     }
 
-    private static TetrisResults playTetris(long pieces, String line, boolean bailout, boolean onlyOnGasReset, long bailOutVal) {
+    private static TetrisResults playTetris(long pieces, String line, boolean bailout, boolean onlyOnGasReset, long bailOutVal) throws InterruptedException {
         Queue<Boolean> gasJet = new LinkedList<>();
         for(Character c : line.toCharArray()) {
             gasJet.add(c == '>'); // true if right, false if left
@@ -217,11 +255,11 @@ public class Advent17 {
         boolean gasReset;
         ArrayList<Piece> piecesList = new ArrayList<>();
         piecesList.add(new Piece(new Point[]{new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0),
-                new Point(4, 0), new Point(5, 0), new Point(6, 0)}));
-        try(ProgressBar pb = new ProgressBar("Tetris ", pieces)) {
+                new Point(4, 0), new Point(5, 0), new Point(6, 0)}, TetrisColors.ANSI_WHITE));
+        //try(ProgressBar pb = new ProgressBar("Tetris ", pieces)) {
             for(long i = 0; i < pieces; i++) {
                 Piece piece = new Piece(getMaxHeight(piecesList), (int) (i % 5)); // iterate through the 5 pieces
-                pb.step();
+                //pb.step();
                 while(!piece.isAtRest()) {
                     gasReset = false;
                     if(gasJet.isEmpty()) { // refill gas jets
@@ -241,12 +279,16 @@ public class Advent17 {
                             return new TetrisResults(getMaxHeight(piecesList), i);
                         }
                     }
+                    if(!bailout) {
+                        drawTetris(piecesList, piece);
+                    }
+
                     piece.moveLaterally(Boolean.TRUE.equals(gasJet.poll()) ? 1 : -1, piecesList);
                     piece.moveDown(piecesList);
                 }
                 piecesList.add(piece);
             }
-        }
+        //}
         return new TetrisResults(getMaxHeight(piecesList));
     }
 
@@ -258,6 +300,49 @@ public class Advent17 {
             }
         }
         return maxHeight;
+    }
+
+    public static void drawTetris(ArrayList<Piece> pieces, Piece newPiece) throws InterruptedException {
+        ArrayList<Piece> piecesCopy = new ArrayList<>();
+        for(Piece piece : pieces) {
+            piecesCopy.add(new Piece(piece.getPoints(), piece.getColor()));
+        }
+        piecesCopy.add(newPiece);
+
+        int maxHeight = Math.max(getMaxHeight(piecesCopy), maxHeightForDrawing);
+        maxHeightForDrawing = maxHeight;
+        int maxWidth = 7;
+        if(maxHeight < 40) {
+            return;
+        }
+        Thread.sleep(80);
+        char[][] tetris = new char[maxHeight + 1][maxWidth];
+        String[][] tetrisColors = new String[maxHeight + 1][maxWidth];
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        System.out.println(TetrisColors.ANSI_BLUE_BACKGROUND+TetrisColors.ANSI_WHITE+"     ╔══════════════╗"+TetrisColors.ANSI_RESET);
+        System.out.println(TetrisColors.ANSI_BLUE_BACKGROUND+TetrisColors.ANSI_WHITE+"     ║1 2 3 4 5 6 7 ║"+TetrisColors.ANSI_RESET);
+        System.out.println(TetrisColors.ANSI_BLUE_BACKGROUND+TetrisColors.ANSI_WHITE+"╔════╬══════════════╣"+TetrisColors.ANSI_RESET);
+        for(int i = maxHeight; i > maxHeight - 20; i--) {
+            for(int j = 0; j < maxWidth; j++) {
+                tetris[i][j] = ' ';
+                tetrisColors[i][j] = TetrisColors.ANSI_RESET;
+            }
+        }
+        for(Piece piece : piecesCopy) {
+            for(Point point : piece.getPoints()) {
+                tetris[point.getY()][point.getX()] = '█';
+                tetrisColors[point.getY()][point.getX()] = piece.getColor();
+            }
+        }
+        for(int i = maxHeight; i > maxHeight - 20; i--) {
+            System.out.print(TetrisColors.ANSI_BLUE_BACKGROUND+TetrisColors.ANSI_WHITE+"║"+String.format("%4d║", i)+TetrisColors.ANSI_RESET);
+            for(int j = 0; j < maxWidth; j++) {
+                System.out.print(TetrisColors.ANSI_BLUE_BACKGROUND+(tetris[i][j]!=' '?tetrisColors[i][j]:"")+tetris[i][j]+tetris[i][j]+TetrisColors.ANSI_RESET);
+            }
+            System.out.println(TetrisColors.ANSI_BLUE_BACKGROUND+TetrisColors.ANSI_WHITE+"║"+TetrisColors.ANSI_RESET);
+        }
+        System.out.println(TetrisColors.ANSI_BLUE_BACKGROUND+"╚════╩══════════════╝"+TetrisColors.ANSI_RESET);
     }
 
 }
