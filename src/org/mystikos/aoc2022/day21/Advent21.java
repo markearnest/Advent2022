@@ -69,29 +69,32 @@ public class Advent21 {
         phase1Answer = runMonkeyJob(root, barrelOfMonkeys, false);
         System.out.println("Phase 1 Answer: " + phase1Answer);
 
-        /* Used these two calls to zero in close enough to the number to be able to brute force it
-          Spent about 20 minutes getting down to this upper and lower bound, then ran it and it found the number
-          in 0.5 seconds. I'm not particularly proud of this solution, but it works. Someday I'll come back and
-          write an algorithm to do this properly.
-         */
-        long i;
-        i = 3882224465655L;
-        barrelOfMonkeys.get("humn").setNumber(i);
-        if(checkMonkeyEquality(root, barrelOfMonkeys, true)) {
-            phase2Answer = i;
+        long startingNumber = 1;
+        long result = 0;
+        while(result >= 0) {
+            startingNumber *= 10;
+            result = howClose(startingNumber, barrelOfMonkeys);
         }
-        i = 3882224555555L;
-        barrelOfMonkeys.get("humn").setNumber(i);
-        if(checkMonkeyEquality(root, barrelOfMonkeys, true)) {
-            phase2Answer = i;
+        startingNumber /= 10;
+        int digits = String.valueOf(startingNumber).length();
+        for(int n = 1; n < digits; n++) {
+            long multiplier = (long) Math.pow(10, n);
+            result = Long.MAX_VALUE;
+            while(result >= 100) {
+                startingNumber += startingNumber / multiplier;
+                result = howClose(startingNumber, barrelOfMonkeys);
+            }
+            startingNumber -= startingNumber / multiplier;
         }
-        for(i = 3882224465655L;i < 3882224555555L; i++) {
+
+        for(long i = startingNumber;i < Long.MAX_VALUE; i++) {
             barrelOfMonkeys.get("humn").setNumber(i);
             if(checkMonkeyEquality(root, barrelOfMonkeys, false)) {
                 phase2Answer = i;
                 break;
             }
         }
+
         System.out.println("Phase 2 Answer: " + phase2Answer);
         long currentTime = System.currentTimeMillis();
         double elapsedTime = (currentTime - startTime) / 1000.0;
@@ -101,6 +104,13 @@ public class Advent21 {
         if (print) System.out.println("Checking equality for monkey: " + (runMonkeyJob(barrelOfMonkeys.get(monkey.getJobMonkeys()[0]), barrelOfMonkeys, true) - runMonkeyJob(barrelOfMonkeys.get(monkey.getJobMonkeys()[1]), barrelOfMonkeys, true)));
         return runMonkeyJob(barrelOfMonkeys.get(monkey.getJobMonkeys()[0]), barrelOfMonkeys, true) == runMonkeyJob(barrelOfMonkeys.get(monkey.getJobMonkeys()[1]), barrelOfMonkeys, true);
     }
+
+    public static long howClose(long humanNumber, Map<String, Monkey> barrelOfMonkeys) {
+        barrelOfMonkeys.get("humn").setNumber(humanNumber);
+        Monkey root = barrelOfMonkeys.get("root");
+        return (runMonkeyJob(barrelOfMonkeys.get(root.getJobMonkeys()[0]), barrelOfMonkeys, true) - runMonkeyJob(barrelOfMonkeys.get(root.getJobMonkeys()[1]), barrelOfMonkeys, true));
+    }
+
     public static long runMonkeyJob(Monkey monkey, Map<String, Monkey> barrelOfMonkeys, boolean recalculate) {
         if(!recalculate && monkey.isDone()) {
             return monkey.getNumber();
@@ -134,4 +144,5 @@ public class Advent21 {
         }
         return true;
     }
+
 }
