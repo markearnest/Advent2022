@@ -71,13 +71,13 @@ public class Advent21 {
 
         long startingNumber = 1;
         long result = 0;
-        while(result >= 0) {
+        while(result >= 0) { // Find how many digits answer has
             startingNumber *= 10;
             result = howClose(startingNumber, barrelOfMonkeys);
         }
         startingNumber /= 10;
         int digits = String.valueOf(startingNumber).length();
-        for(int n = 1; n < digits; n++) {
+        for(int n = 1; n < digits; n++) { // zero in by powers to 10 until within 100 of answer
             long multiplier = (long) Math.pow(10, n);
             result = Long.MAX_VALUE;
             while(result >= 100) {
@@ -86,15 +86,13 @@ public class Advent21 {
             }
             startingNumber -= startingNumber / multiplier;
         }
-
-        for(long i = startingNumber;i < Long.MAX_VALUE; i++) {
+        for(long i = startingNumber;i < Long.MAX_VALUE; i++) { // increment by 1 until answer is found
             barrelOfMonkeys.get("humn").setNumber(i);
             if(checkMonkeyEquality(root, barrelOfMonkeys, false)) {
                 phase2Answer = i;
                 break;
             }
         }
-
         System.out.println("Phase 2 Answer: " + phase2Answer);
         long currentTime = System.currentTimeMillis();
         double elapsedTime = (currentTime - startTime) / 1000.0;
